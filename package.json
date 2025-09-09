@@ -1,0 +1,18 @@
+{
+  "name": "stay-gold",
+  "version": "1.0.0",
+  "description": "Checks and balances",
+  "main": "index.js",
+  "author": "Riley Bathurst <riley@rileybathurst.com> (https://rileybathurst.com)",
+  "scripts": {
+    "find": "node check-for-bang.ts",
+    "todos": "node check-todo.ts",
+    "variables": "node check-css-vars.ts",
+    "gold": "npm run find && npm run todos && npm run variables && echo 'All checks passed!' || echo 'Some checks failed!'"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.3.1",
+    "typescript": "^5.9.2"
+  }
+}
