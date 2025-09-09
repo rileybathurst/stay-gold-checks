@@ -1,14 +1,27 @@
 {
   "name": "stay-gold",
   "version": "1.0.0",
-  "description": "Checks and balances",
-  "main": "index.js",
+  "description": "Checks and balances for code quality. Run as a dev dependency in any project.",
+  "main": "dist/index.js",
   "author": "Riley Bathurst <riley@rileybathurst.com> (https://rileybathurst.com)",
+  "files": [
+    "dist",
+    "named-colors.ts",
+    "README.md"
+  ],
+  "bin": {
+    "stay-gold-find": "dist/bang.js",
+    "stay-gold-todos": "dist/todos.js",
+    "stay-gold-css-vars": "dist/css-vars.js",
+    "stay-gold-css-named-colors": "dist/css-named-colors.js"
+  },
   "scripts": {
-    "find": "node check-for-bang.ts",
-    "todos": "node check-todo.ts",
-    "variables": "node check-css-vars.ts",
-    "gold": "npm run find && npm run todos && npm run variables && echo 'All checks passed!' || echo 'Some checks failed!'"
+    "build": "tsc",
+    "find": "node dist/bang.js",
+    "todos": "node dist/todos.js",
+    "variables": "node dist/css-vars.js",
+    "named-colors": "node dist/css-named-colors.js",
+    "gold": "npm run find && npm run todos && npm run variables && npm run named-colors && echo 'All checks passed!' || echo 'Some checks failed!'"
   },
   "license": "ISC",
   "devDependencies": {
