@@ -81,6 +81,7 @@ describe("stay-gold command", () => {
     });
     describe("2. Command correctly executes all sub-commands", () => {
         it("should detect forbidden bang comments", () => {
+            var _a, _b;
             writeFileSync(join(srcDir, "with-bang.ts"), "// ! This should be detected\n");
             try {
                 execSync(`node ${join(process.cwd(), "dist/bang.js")}`, {
@@ -92,10 +93,15 @@ describe("stay-gold command", () => {
             }
             catch (error) {
                 expect(error.status).toBe(1);
-                expect(error.stdout.toString()).toContain("Forbidden string found");
+                const stderr = ((_a = error.stderr) === null || _a === void 0 ? void 0 : _a.toString()) || "";
+                const stdout = ((_b = error.stdout) === null || _b === void 0 ? void 0 : _b.toString()) || "";
+                const output = stderr + stdout;
+                expect(output).toContain("Forbidden string found");
             }
-            // Cleanup
-            rmSync(join(srcDir, "with-bang.ts"));
+            finally {
+                // Cleanup
+                rmSync(join(srcDir, "with-bang.ts"), { force: true });
+            }
         });
         it("should detect and count TODO comments", () => {
             writeFileSync(join(srcDir, "with-todo.ts"), "// TODO: Fix this later\nconst x = 1;\n");
@@ -112,8 +118,10 @@ describe("stay-gold command", () => {
                 expect(error.stdout.toString()).toContain("TODO(s) in");
                 expect(error.stderr.toString()).toContain("Total TODOs found: 1");
             }
-            // Cleanup
-            rmSync(join(srcDir, "with-todo.ts"));
+            finally {
+                // Cleanup
+                rmSync(join(srcDir, "with-todo.ts"), { force: true });
+            }
         });
         it("should detect undefined CSS variables", () => {
             writeFileSync(join(stylesDir, "bad-vars.css"), ".test { color: var(--undefined-var); }\n");
@@ -130,8 +138,10 @@ describe("stay-gold command", () => {
                 expect(error.stderr.toString()).toContain("Undefined CSS variable");
                 expect(error.stderr.toString()).toContain("undefined-var");
             }
-            // Cleanup
-            rmSync(join(stylesDir, "bad-vars.css"));
+            finally {
+                // Cleanup
+                rmSync(join(stylesDir, "bad-vars.css"), { force: true });
+            }
         });
         it("should detect named CSS colors", () => {
             writeFileSync(join(stylesDir, "named-colors.css"), ".test { color: red; background: blue; }\n");
@@ -148,8 +158,10 @@ describe("stay-gold command", () => {
                 expect(error.stdout.toString()).toContain("named color");
                 expect(error.stderr.toString()).toContain("Total named CSS colors");
             }
-            // Cleanup
-            rmSync(join(stylesDir, "named-colors.css"));
+            finally {
+                // Cleanup
+                rmSync(join(stylesDir, "named-colors.css"), { force: true });
+            }
         });
         it("should pass all checks when project is clean", () => {
             const output = execSync(`node ${join(process.cwd(), "dist/bang.js")}`, {
@@ -208,10 +220,10 @@ describe("stay-gold command", () => {
             });
             expect(output).toContain("No forbidden string found");
             // Cleanup
-            rmSync(join(srcDir, "test.js"));
-            rmSync(join(srcDir, "test.ts"));
-            rmSync(join(srcDir, "test.tsx"));
-            rmSync(join(srcDir, "test.astro"));
+            rmSync(join(srcDir, "test.js"), { force: true });
+            rmSync(join(srcDir, "test.ts"), { force: true });
+            rmSync(join(srcDir, "test.tsx"), { force: true });
+            rmSync(join(srcDir, "test.astro"), { force: true });
         });
         it("should handle all comment styles for bang detection", () => {
             // Test JavaScript style
@@ -226,7 +238,9 @@ describe("stay-gold command", () => {
             catch (error) {
                 expect(error.status).toBe(1);
             }
-            rmSync(join(srcDir, "js-bang.js"));
+            finally {
+                rmSync(join(srcDir, "js-bang.js"), { force: true });
+            }
             // Test HTML style
             writeFileSync(join(srcDir, "html-bang.astro"), "<!-- ! Error -->\n");
             try {
@@ -239,7 +253,9 @@ describe("stay-gold command", () => {
             catch (error) {
                 expect(error.status).toBe(1);
             }
-            rmSync(join(srcDir, "html-bang.astro"));
+            finally {
+                rmSync(join(srcDir, "html-bang.astro"), { force: true });
+            }
             // Test JSX style
             writeFileSync(join(srcDir, "jsx-bang.tsx"), "{/* ! Error */}\n");
             try {
@@ -252,7 +268,9 @@ describe("stay-gold command", () => {
             catch (error) {
                 expect(error.status).toBe(1);
             }
-            rmSync(join(srcDir, "jsx-bang.tsx"));
+            finally {
+                rmSync(join(srcDir, "jsx-bang.tsx"), { force: true });
+            }
         });
         it("should exit with proper exit codes", () => {
             // Test success exit code
@@ -279,7 +297,9 @@ describe("stay-gold command", () => {
             catch (error) {
                 expect(error.status).toBe(1);
             }
-            rmSync(join(srcDir, "fail.ts"));
+            finally {
+                rmSync(join(srcDir, "fail.ts"), { force: true });
+            }
         });
     });
 });
