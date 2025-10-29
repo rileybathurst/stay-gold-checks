@@ -1,26 +1,22 @@
-"use strict";
 // check-css-named-colors.ts
 // Script to check for usage of named CSS colors in styles folder
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const node_fs_1 = __importDefault(require("node:fs"));
-const node_path_1 = __importDefault(require("node:path"));
-const named_colors_ts_1 = require("./named-colors.ts");
-const stylesDir = node_path_1.default.resolve(new URL(".", import.meta.url).pathname, "src/styles");
+import fs from "node:fs";
+import path from "node:path";
+import { namedColors } from "./named-colors.js";
+const __dirname = path.resolve();
+const stylesDir = path.resolve(__dirname, "src/styles");
 const exts = [".css"];
 // List of named CSS colors (partial, can be expanded)
 function walkCssFiles(dir) {
-    return node_fs_1.default.readdirSync(dir)
-        .filter((f) => exts.includes(node_path_1.default.extname(f)))
-        .map((f) => node_path_1.default.join(dir, f));
+    return fs.readdirSync(dir)
+        .filter((f) => exts.includes(path.extname(f)))
+        .map((f) => path.join(dir, f));
 }
 function checkNamedColors(files) {
     let totalCount = 0;
     files.forEach((file) => {
-        const content = node_fs_1.default.readFileSync(file, "utf8");
-        named_colors_ts_1.namedColors.forEach((color) => {
+        const content = fs.readFileSync(file, "utf8");
+        namedColors.forEach((color) => {
             const regex = new RegExp(`\\b${color}\\b`, "gi");
             const matches = content.match(regex);
             if (matches && matches.length > 0) {

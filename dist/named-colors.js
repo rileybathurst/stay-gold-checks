@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.namedColors = void 0;
-exports.namedColors = [
+export const namedColors = [
     "aliceblue",
     "antiquewhite",
     "aqua",
