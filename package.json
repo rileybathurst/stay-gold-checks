@@ -1,6 +1,6 @@
 {
   "name": "stay-gold",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "type": "module",
   "description": "Checks and balances for code quality. Run as a dev dependency in any project.",
   "main": "dist/index.js",
