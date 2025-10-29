@@ -1,6 +1,6 @@
 {
   "name": "stay-gold",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Checks and balances for code quality. Run as a dev dependency in any project.",
   "main": "dist/index.js",
@@ -22,7 +22,7 @@
     "todos": "node dist/todos.js",
     "variables": "node dist/css-vars.js",
     "named-colors": "node dist/css-named-colors.js",
-    "gold": "npm run find && npm run todos && npm run variables && npm run named-colors && echo 'All checks passed!' || echo 'Some checks failed!'"  
+    "gold": "npm run find && npm run todos && npm run variables && npm run named-colors && echo 'All checks passed!' || echo 'Some checks failed!'"
   },
   "keywords": [
     "code-quality",
