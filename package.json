@@ -19,6 +19,8 @@
   },
   "scripts": {
     "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "find": "node dist/bang.js",
     "todos": "node dist/todos.js",
     "variables": "node dist/css-vars.js",
@@ -38,7 +40,9 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^24.3.1",
+    "@vitest/ui": "^4.0.5",
+    "string-checker": "latest",
     "typescript": "^5.9.2",
-    "string-checker": "latest"
+    "vitest": "^4.0.5"
   }
 }
