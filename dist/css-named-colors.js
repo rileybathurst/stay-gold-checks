@@ -1,21 +1,20 @@
+#!/usr/bin/env node
 // check-css-named-colors.ts
 // Script to check for usage of named CSS colors in styles folder
-import fs from "node:fs";
-import path from "node:path";
+import { readFileSync, readdirSync } from "node:fs";
+import { resolve, join, extname } from "node:path";
 import { namedColors } from "./named-colors.js";
-const __dirname = path.resolve();
-const stylesDir = path.resolve(__dirname, "src/styles");
+const stylesDir = resolve(process.cwd(), "src/styles");
 const exts = [".css"];
-// List of named CSS colors (partial, can be expanded)
 function walkCssFiles(dir) {
-    return fs.readdirSync(dir)
-        .filter((f) => exts.includes(path.extname(f)))
-        .map((f) => path.join(dir, f));
+    return readdirSync(dir)
+        .filter((f) => exts.includes(extname(f)))
+        .map((f) => join(dir, f));
 }
 function checkNamedColors(files) {
     let totalCount = 0;
     files.forEach((file) => {
-        const content = fs.readFileSync(file, "utf8");
+        const content = readFileSync(file, "utf8");
         namedColors.forEach((color) => {
             const regex = new RegExp(`\\b${color}\\b`, "gi");
             const matches = content.match(regex);

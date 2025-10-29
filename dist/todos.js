@@ -1,32 +1,16 @@
+#!/usr/bin/env node
 // check-todo.ts
 // Script to check for the string "TODO:" in project files and count occurrences
-var _a, _b;
-import fs from "node:fs";
-import path from "node:path";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { walk } from "./walk.js";
 const exts = [".js", ".ts", ".astro", ".css", ".tsx"];
-const mainFilename = (_b = (_a = require.main) === null || _a === void 0 ? void 0 : _a.filename) !== null && _b !== void 0 ? _b : __filename;
-const __dirname = path.dirname(mainFilename);
-const rootDir = path.resolve(__dirname, "src");
-const publicDir = path.resolve(__dirname, "public");
-function walk(dir) {
-    let results = [];
-    const list = fs.readdirSync(dir);
-    list.forEach((file) => {
-        const filePath = path.join(dir, file);
-        const stat = fs.statSync(filePath);
-        if (stat === null || stat === void 0 ? void 0 : stat.isDirectory()) {
-            results = results.concat(walk(filePath));
-        }
-        else if (exts.includes(path.extname(file))) {
-            results.push(filePath);
-        }
-    });
-    return results;
-}
+const rootDir = resolve(process.cwd(), "src");
+const publicDir = resolve(process.cwd(), "public");
 function checkTodos(files) {
     let totalCount = 0;
     files.forEach((file) => {
-        const content = fs.readFileSync(file, "utf8");
+        const content = readFileSync(file, "utf8");
         const matches = content.match(/TODO:/g);
         if (matches && matches.length > 0) {
             console.log(`Found ${matches.length} TODO(s) in: ${file}`);
@@ -35,8 +19,8 @@ function checkTodos(files) {
     });
     return totalCount;
 }
-const srcFiles = walk(rootDir);
-const publicFiles = walk(publicDir);
+const srcFiles = walk(rootDir, exts);
+const publicFiles = walk(publicDir, exts);
 const allFiles = srcFiles.concat(publicFiles);
 const todoCount = checkTodos(allFiles);
 if (todoCount > 0) {
