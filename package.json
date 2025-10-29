@@ -14,7 +14,8 @@
     "stay-gold-find": "dist/bang.js",
     "stay-gold-todos": "dist/todos.js",
     "stay-gold-css-vars": "dist/css-vars.js",
-    "stay-gold-css-named-colors": "dist/css-named-colors.js"
+    "stay-gold-css-named-colors": "dist/css-named-colors.js",
+    "stay-gold": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
