@@ -2,11 +2,14 @@
 // index.ts
 // Main script to run all stay-gold checks in sequence
 import { spawn } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+const here = path.dirname(fileURLToPath(import.meta.url));
 const checks = [
-    { name: "Bang Check", script: "./dist/bang.js" },
-    { name: "TODO Check", script: "./dist/todos.js" },
-    { name: "CSS Variables Check", script: "./dist/css-vars.js" },
-    { name: "CSS Named Colors Check", script: "./dist/css-named-colors.js" },
+    { name: "Bang Check", script: path.join(here, "dist/bang.js") },
+    { name: "TODO Check", script: path.join(here, "dist/todos.js") },
+    { name: "CSS Variables Check", script: path.join(here, "dist/css-vars.js") },
+    { name: "CSS Named Colors Check", script: path.join(here, "dist/css-named-colors.js") },
 ];
 async function runCheck(script, name) {
     return new Promise((resolve) => {
