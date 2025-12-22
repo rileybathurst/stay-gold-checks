@@ -8,12 +8,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const filePath = path.dirname(fileURLToPath(import.meta.url));
+console.log(filePath);
 
 const checks = [
-	{ name: "Bang Check", script: path.join(filePath, "bang.js") },
-	{ name: "TODO Check", script: path.join(filePath, "todos.js") },
-	{ name: "CSS Variables Check", script: path.join(filePath, "css-vars.js") },
-	{ name: "CSS Named Colors Check", script: path.join(filePath, "css-named-colors.js") },
+	{ name: "Bang Check", script: path.join(filePath, "/bang.js") },
+	{ name: "TODO Check", script: path.join(filePath, "/todos.js") },
+	{ name: "CSS Variables Check", script: path.join(filePath, "/css-vars.js") },
+	{ name: "CSS Named Colors Check", script: path.join(filePath, "/css-named-colors.js") },
 ];
 
 async function runCheck(script: string, name: string): Promise<boolean> {
