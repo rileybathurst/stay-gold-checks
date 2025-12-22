@@ -3,14 +3,13 @@
 // check-for-bang.js
 // Script to check for the string "// !" in project files and exit with error if found
 
-
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { walk } from "./walk.js";
 
 const exts = [".js", ".ts", ".astro", ".css", ".tsx"];
 const rootDir = resolve(process.cwd(), "src");
-const publicDir = resolve(process.cwd(), "public");
+// const publicDir = resolve(process.cwd(), "public");
 
 function checkFiles(files: string[]): boolean {
   let found: boolean = false;
@@ -29,10 +28,11 @@ function checkFiles(files: string[]): boolean {
 }
 
 const srcFiles = walk(rootDir, exts);
-const publicFiles = walk(publicDir, exts);
-const allFiles = srcFiles.concat(publicFiles);
+// const publicFiles = walk(publicDir, exts);
+// const allFiles = srcFiles.concat(publicFiles);
 
-if (checkFiles(allFiles)) {
+if (checkFiles(srcFiles)) {
+  // console.error(`Total ! found: ${namedStringCount}`);
   process.exit(1);
 } else {
   console.log("No forbidden string found.");

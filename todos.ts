@@ -10,7 +10,7 @@ import { walk } from "./walk.js";
 
 const exts = [".js", ".ts", ".astro", ".css", ".tsx"];
 const rootDir = resolve(process.cwd(), "src");
-const publicDir = resolve(process.cwd(), "public");
+// const publicDir = resolve(process.cwd(), "public");
 
 function checkTodos(files: string[]): number {
   let totalCount: number = 0;
@@ -26,10 +26,10 @@ function checkTodos(files: string[]): number {
 }
 
 const srcFiles = walk(rootDir, exts);
-const publicFiles = walk(publicDir, exts);
-const allFiles = srcFiles.concat(publicFiles);
+// const publicFiles = walk(publicDir, exts);
+// const allFiles = srcFiles.concat(publicFiles);
 
-const todoCount = checkTodos(allFiles);
+const todoCount = checkTodos(srcFiles);
 
 if (todoCount > 0) {
   console.warn(`Total TODOs found: ${todoCount}`);

@@ -44,7 +44,7 @@ async function runAllChecks(): Promise<void> {
 		}
 	}
 
-	console.log("\n" + "=".repeat(50));
+	console.log(`\n${"=".repeat(50)}`);
 
 	if (allPassed) {
 		console.log("🎉 All checks passed! Your code stays gold! ✨");

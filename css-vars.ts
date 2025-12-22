@@ -5,7 +5,7 @@
 
 
 import { readFileSync, readdirSync } from "node:fs";
-import { resolve, join, basename, extname } from "node:path";
+import { resolve, join, basename } from "node:path";
 
 const stylesDir = resolve(process.cwd(), "src/styles");
 const variablesFile = join(stylesDir, "variables.css");
