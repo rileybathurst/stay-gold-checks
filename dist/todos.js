@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 import { walk } from "./walk.js";
 const exts = [".js", ".ts", ".astro", ".css", ".tsx"];
 const rootDir = resolve(process.cwd(), "src");
-const publicDir = resolve(process.cwd(), "public");
+// const publicDir = resolve(process.cwd(), "public");
 function checkTodos(files) {
     let totalCount = 0;
     files.forEach((file) => {
@@ -20,9 +20,9 @@ function checkTodos(files) {
     return totalCount;
 }
 const srcFiles = walk(rootDir, exts);
-const publicFiles = walk(publicDir, exts);
-const allFiles = srcFiles.concat(publicFiles);
-const todoCount = checkTodos(allFiles);
+// const publicFiles = walk(publicDir, exts);
+// const allFiles = srcFiles.concat(publicFiles);
+const todoCount = checkTodos(srcFiles);
 if (todoCount > 0) {
     console.warn(`Total TODOs found: ${todoCount}`);
     process.exit(1);

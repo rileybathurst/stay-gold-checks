@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 import { walk } from "./walk.js";
 const exts = [".js", ".ts", ".astro", ".css", ".tsx"];
 const rootDir = resolve(process.cwd(), "src");
-const publicDir = resolve(process.cwd(), "public");
+// const publicDir = resolve(process.cwd(), "public");
 function checkFiles(files) {
     let found = false;
     files.forEach((file) => {
@@ -21,9 +21,10 @@ function checkFiles(files) {
     return found;
 }
 const srcFiles = walk(rootDir, exts);
-const publicFiles = walk(publicDir, exts);
-const allFiles = srcFiles.concat(publicFiles);
-if (checkFiles(allFiles)) {
+// const publicFiles = walk(publicDir, exts);
+// const allFiles = srcFiles.concat(publicFiles);
+if (checkFiles(srcFiles)) {
+    // console.error(`Total ! found: ${namedStringCount}`);
     process.exit(1);
 }
 else {

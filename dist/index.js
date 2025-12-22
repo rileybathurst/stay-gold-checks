@@ -6,14 +6,14 @@ const checks = [
     { name: "Bang Check", script: "./dist/bang.js" },
     { name: "TODO Check", script: "./dist/todos.js" },
     { name: "CSS Variables Check", script: "./dist/css-vars.js" },
-    { name: "CSS Named Colors Check", script: "./dist/css-named-colors.js" }
+    { name: "CSS Named Colors Check", script: "./dist/css-named-colors.js" },
 ];
 async function runCheck(script, name) {
     return new Promise((resolve) => {
         console.log(`\n--- Running ${name} ---`);
         const child = spawn("node", [script], {
             stdio: "inherit",
-            cwd: process.cwd()
+            cwd: process.cwd(),
         });
         child.on("close", (code) => {
             if (code === 0) {
@@ -36,7 +36,7 @@ async function runAllChecks() {
             allPassed = false;
         }
     }
-    console.log("\n" + "=".repeat(50));
+    console.log(`\n${"=".repeat(50)}`);
     if (allPassed) {
         console.log("🎉 All checks passed! Your code stays gold! ✨");
         process.exit(0);
