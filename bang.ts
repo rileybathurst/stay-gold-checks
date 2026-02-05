@@ -18,7 +18,7 @@ function checkFiles(files: string[]): boolean {
     if (
       content.includes("// !") ||
       content.includes("<!-- !") ||
-      content.includes("{/* !")
+      content.includes("/* !")
     ) {
       console.error(`Forbidden string found in: ${file}`);
       found = true;

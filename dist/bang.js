@@ -13,7 +13,7 @@ function checkFiles(files) {
         const content = readFileSync(file, "utf8");
         if (content.includes("// !") ||
             content.includes("<!-- !") ||
-            content.includes("{/* !")) {
+            content.includes("/* !")) {
             console.error(`Forbidden string found in: ${file}`);
             found = true;
         }
