@@ -25,7 +25,8 @@
     "todos": "node dist/todos.js",
     "variables": "node dist/css-vars.js",
     "named-colors": "node dist/css-named-colors.js",
-    "gold": "npm run find && npm run todos && npm run variables && npm run named-colors && echo 'All checks passed!' || echo 'Some checks failed!'"
+    "gold": "npm run find && npm run todos && npm run variables && npm run named-colors && echo 'All checks passed!' || echo 'Some checks failed!'",
+    "release": "npm version patch && npm login && npm publish"
   },
   "keywords": [
     "code-quality",
