@@ -78,6 +78,24 @@ describe("stay-gold command", () => {
             });
             expect(result).toBeDefined();
         });
+        it("should skip only the CSS variables check when variables.css is missing", () => {
+            rmSync(join(stylesDir, "named-colors.css"), { force: true });
+            rmSync(join(stylesDir, "variables.css"), { force: true });
+            try {
+                const result = execSync(`node ${join(process.cwd(), "dist/index.js")} 2>&1`, {
+                    cwd: testDir,
+                    stdio: "pipe",
+                    encoding: "utf-8",
+                });
+                expect(result).toContain("CSS Variables Check skipped");
+                expect(result).toContain("Bang Check passed");
+                expect(result).toContain("TODO Check passed");
+                expect(result).toContain("CSS Named Colors Check passed");
+            }
+            finally {
+                writeFileSync(join(stylesDir, "variables.css"), ":root {\n  --primary: #000;\n  --secondary: #fff;\n}\n");
+            }
+        });
     });
     describe("2. Command correctly executes all sub-commands", () => {
         it("should detect forbidden bang comments", () => {

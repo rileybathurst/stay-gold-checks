@@ -6,14 +6,22 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { existsSync } from "node:fs";
 
 const filePath = path.dirname(fileURLToPath(import.meta.url));
 console.log(filePath);
 
+const variablesCssPath = path.join(process.cwd(), "src/styles/variables.css");
+const hasVariablesCss = existsSync(variablesCssPath);
+
 const checks = [
 	{ name: "Bang Check", script: path.join(filePath, "/bang.js") },
 	{ name: "TODO Check", script: path.join(filePath, "/todos.js") },
-	{ name: "CSS Variables Check", script: path.join(filePath, "/css-vars.js") },
+	{
+		name: "CSS Variables Check",
+		script: path.join(filePath, "/css-vars.js"),
+		requiresVariablesCss: true,
+	},
 	{ name: "CSS Named Colors Check", script: path.join(filePath, "/css-named-colors.js") },
 ];
 
@@ -39,6 +47,13 @@ async function runAllChecks(): Promise<void> {
 	let bangPassed = true;
 
 	for (const check of checks) {
+		if (check.requiresVariablesCss && !hasVariablesCss) {
+			console.warn(
+				`⚠️ ${check.name} skipped (missing src/styles/variables.css)`,
+			);
+			continue;
+		}
+
 		const passed = await runCheck(check.script, check.name);
 		if (passed) {
 			console.log(`✅ ${check.name} passed`);
