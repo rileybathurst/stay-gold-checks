@@ -45,5 +45,8 @@
     "string-checker": "latest",
     "typescript": "^5.9.2",
     "vitest": "^4.0.5"
+  },
+  "dependencies": {
+    "picocolors": "^1.1.1"
   }
 }
