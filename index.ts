@@ -81,7 +81,7 @@ async function runAllChecks(): Promise<void> {
 			check.requiresPath &&
 			!existsSync(path.join(process.cwd(), check.requiresPath))
 		) {
-			log.warn(`⚠️ ${check.name} skipped (missing ${check.requiresPath})`);
+			log.muted(`⏭️ ${check.name} skipped (missing ${check.requiresPath})`);
 			continue;
 		}
 
