@@ -20,22 +20,28 @@ const log = {
 	muted: (message: string): void => console.log(pc.dim(message)),
 };
 
-const variablesCssPath = path.join(process.cwd(), "src/styles/variables.css");
-const hasVariablesCss = existsSync(variablesCssPath);
-
 const checks = [
 	{ name: "Bang Check", script: path.join(filePath, "/bang.js") },
 	{ name: "TODO Check", script: path.join(filePath, "/todos.js") },
 	{
 		name: "CSS Variables Check",
 		script: path.join(filePath, "/css-vars.js"),
-		requiresVariablesCss: true,
+		requiresPath: "src/styles/variables.css",
 	},
 	{
 		name: "CSS Named Colors Check",
 		script: path.join(filePath, "/css-named-colors.js"),
+		requiresPath: "src/styles",
 	},
-	{ name: "CSS Imports Check", script: path.join(filePath, "/css-imports.js") },
+	{
+		name: "CSS Imports Check",
+		script: path.join(filePath, "/css-imports.js"),
+		requiresPath: "src/styles",
+	},
+	{
+		name: "GraphQL Query Names Check",
+		script: path.join(filePath, "/graphql-query-names.js"),
+	},
 ];
 
 async function runCheck(script: string, name: string): Promise<boolean> {
@@ -61,8 +67,11 @@ async function runAllChecks(): Promise<void> {
 	let bangPassed = true;
 
 	for (const check of checks) {
-		if (check.requiresVariablesCss && !hasVariablesCss) {
-			log.warn(`⚠️ ${check.name} skipped (missing src/styles/variables.css)`);
+		if (
+			check.requiresPath &&
+			!existsSync(path.join(process.cwd(), check.requiresPath))
+		) {
+			log.warn(`⚠️ ${check.name} skipped (missing ${check.requiresPath})`);
 			continue;
 		}
 

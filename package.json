@@ -15,7 +15,8 @@
     "stay-gold-todos": "dist/todos.js",
     "stay-gold-css-vars": "dist/css-vars.js",
     "stay-gold-css-named-colors": "dist/css-named-colors.js",
-    "stay-gold": "dist/index.js"
+    "stay-gold": "dist/index.js",
+    "stay-gold-graphql-query-names": "dist/graphql-query-names.js"
   },
   "scripts": {
     "build": "tsc",
