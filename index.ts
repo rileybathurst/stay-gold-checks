@@ -21,12 +21,21 @@ const log = {
 };
 
 const checks = [
-	{ name: "Bang Check", script: path.join(filePath, "/bang.js") },
-	{ name: "TODO Check", script: path.join(filePath, "/todos.js") },
+	{
+		name: "Bang Check",
+		script: path.join(filePath, "/bang.js"),
+		failsBuild: true,
+	},
+	{
+		name: "TODO Check",
+		script: path.join(filePath, "/todos.js"),
+		failsBuild: false,
+	},
 	{
 		name: "CSS Variables Check",
 		script: path.join(filePath, "/css-vars.js"),
 		requiresPath: "src/styles/variables.css",
+		failsBuild: false,
 	},
 	{
 		name: "CSS Named Colors Check",
@@ -41,6 +50,7 @@ const checks = [
 	{
 		name: "GraphQL Query Names Check",
 		script: path.join(filePath, "/graphql-query-names.js"),
+		failsBuild: true,
 	},
 ];
 
@@ -64,7 +74,7 @@ async function runCheck(script: string, name: string): Promise<boolean> {
 async function runAllChecks(): Promise<void> {
 	log.headline("Running all Stay Gold checks...\n");
 
-	let bangPassed = true;
+	let blockingCheckFailed = false;
 
 	for (const check of checks) {
 		if (
@@ -79,8 +89,8 @@ async function runAllChecks(): Promise<void> {
 		if (passed) {
 			log.success(`✅ ${check.name} passed`);
 		} else {
-			if (check.name === "Bang Check") {
-				bangPassed = false;
+			if (check.failsBuild) {
+				blockingCheckFailed = true;
 				log.error(`❌ ${check.name} failed (build will fail)`);
 			} else {
 				log.warn(`⚠️ ${check.name} failed (non-blocking)`);
@@ -90,11 +100,13 @@ async function runAllChecks(): Promise<void> {
 
 	log.muted(`\n${"=".repeat(50)}`);
 
-	if (bangPassed) {
+	if (!blockingCheckFailed) {
 		log.success("🎉 All blocking checks passed! Your code stays gold! ✨");
 		process.exit(0);
 	} else {
-		log.error("💥 Bang Check failed. Please fix the issues above.");
+		log.error(
+			"💥 One or more blocking checks failed. Please fix the issues above.",
+		);
 		process.exit(1);
 	}
 }
