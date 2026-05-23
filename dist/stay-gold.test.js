@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { execSync } from "node:child_process";
 import { mkdirSync, writeFileSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -7,6 +7,7 @@ describe("stay-gold command", () => {
     const srcDir = join(testDir, "src");
     const publicDir = join(testDir, "public");
     const stylesDir = join(srcDir, "styles");
+    const preferencesPath = join(testDir, "stay-gold.json");
     beforeAll(() => {
         // Create test project structure
         if (existsSync(testDir)) {
@@ -19,6 +20,13 @@ describe("stay-gold command", () => {
         writeFileSync(join(srcDir, "clean.ts"), "// This is a clean file\nconst x = 1;\n");
         writeFileSync(join(stylesDir, "variables.css"), ":root {\n  --primary: #000;\n  --secondary: #fff;\n}\n");
         writeFileSync(join(stylesDir, "styles.css"), ".test { color: var(--primary); }\n");
+        writeFileSync(join(testDir, "package.json"), JSON.stringify({
+            name: "test-project",
+            version: "1.0.0",
+            dependencies: {
+                react: "^18.0.0",
+            },
+        }, null, 2));
         // Build the project to ensure dist exists
         try {
             execSync("npm run build", { cwd: process.cwd(), stdio: "pipe" });
@@ -32,6 +40,9 @@ describe("stay-gold command", () => {
         if (existsSync(testDir)) {
             rmSync(testDir, { recursive: true, force: true });
         }
+    });
+    afterEach(() => {
+        rmSync(preferencesPath, { force: true });
     });
     describe("1. Command runs successfully without errors", () => {
         it("should execute without throwing errors on clean project", () => {
@@ -189,6 +200,56 @@ describe("stay-gold command", () => {
             });
             expect(output).toContain("No forbidden string found");
         });
+        it("should detect blocked framework dependency prefixes in package.json", () => {
+            var _a;
+            writeFileSync(join(testDir, "package.json"), JSON.stringify({
+                name: "test-project",
+                version: "1.0.0",
+                dependencies: {
+                    gatsby: "^5.0.0",
+                    react: "^18.0.0",
+                },
+            }, null, 2));
+            try {
+                execSync(`node ${join(process.cwd(), "dist/package-json-framework-deps.js")}`, {
+                    cwd: testDir,
+                    stdio: "pipe",
+                    encoding: "utf-8",
+                });
+                expect.fail("Should have exited with error code 1");
+            }
+            catch (error) {
+                expect(error.status).toBe(1);
+                const stderr = ((_a = error.stderr) === null || _a === void 0 ? void 0 : _a.toString()) || "";
+                expect(stderr).toContain("Found dependency matching blocked prefixes");
+                expect(stderr).toContain("gatsby");
+            }
+            finally {
+                writeFileSync(join(testDir, "package.json"), JSON.stringify({
+                    name: "test-project",
+                    version: "1.0.0",
+                    dependencies: {
+                        react: "^18.0.0",
+                    },
+                }, null, 2));
+            }
+        });
+        it("should pass package dependency prefix check when dependencies are clean", () => {
+            writeFileSync(join(testDir, "package.json"), JSON.stringify({
+                name: "test-project",
+                version: "1.0.0",
+                dependencies: {
+                    react: "^18.0.0",
+                    lodash: "^4.17.0",
+                },
+            }, null, 2));
+            const output = execSync(`node ${join(process.cwd(), "dist/package-json-framework-deps.js")}`, {
+                cwd: testDir,
+                stdio: "pipe",
+                encoding: "utf-8",
+            });
+            expect(output).toContain("No blocked framework dependency prefixes found in package.json");
+        });
     });
     describe("3. Command handles various input arguments or flags", () => {
         it("should handle execution from different working directories", () => {
@@ -318,6 +379,73 @@ describe("stay-gold command", () => {
             finally {
                 rmSync(join(srcDir, "fail.ts"), { force: true });
             }
+        });
+    });
+    describe("4. stay-gold.json preferences", () => {
+        it("should skip a check when configured", () => {
+            writeFileSync(join(srcDir, "todo-should-be-skipped.ts"), "// TODO: this would fail if check ran\n");
+            writeFileSync(preferencesPath, JSON.stringify({
+                checks: {
+                    "TODO Check": {
+                        skip: true,
+                    },
+                },
+            }, null, 2));
+            try {
+                const output = execSync(`node ${join(process.cwd(), "dist/index.js")} 2>&1`, {
+                    cwd: testDir,
+                    stdio: "pipe",
+                    encoding: "utf-8",
+                });
+                expect(output).toContain("TODO Check skipped (disabled in stay-gold.json)");
+                expect(output).toContain("All blocking checks passed");
+            }
+            finally {
+                rmSync(join(srcDir, "todo-should-be-skipped.ts"), { force: true });
+            }
+        });
+        it("should allow changing failsBuild via preferences", () => {
+            var _a, _b;
+            writeFileSync(join(srcDir, "todo-blocking.ts"), "// TODO: should fail as blocking via config\n");
+            writeFileSync(preferencesPath, JSON.stringify({
+                checks: {
+                    "TODO Check": {
+                        failsBuild: true,
+                    },
+                },
+            }, null, 2));
+            try {
+                execSync(`node ${join(process.cwd(), "dist/index.js")}`, {
+                    cwd: testDir,
+                    stdio: "pipe",
+                    encoding: "utf-8",
+                });
+                expect.fail("TODO Check should fail the build when configured as blocking");
+            }
+            catch (error) {
+                const commandError = error;
+                expect(commandError.status).toBe(1);
+                const output = `${((_a = commandError.stdout) === null || _a === void 0 ? void 0 : _a.toString()) || ""}${((_b = commandError.stderr) === null || _b === void 0 ? void 0 : _b.toString()) || ""}`;
+                expect(output).toContain("TODO Check failed (build will fail)");
+            }
+            finally {
+                rmSync(join(srcDir, "todo-blocking.ts"), { force: true });
+            }
+        });
+        it("should allow changing requiresPath via preferences", () => {
+            writeFileSync(preferencesPath, JSON.stringify({
+                checks: {
+                    "CSS Variables Check": {
+                        requiresPath: "src/styles/does-not-exist.css",
+                    },
+                },
+            }, null, 2));
+            const output = execSync(`node ${join(process.cwd(), "dist/index.js")} 2>&1`, {
+                cwd: testDir,
+                stdio: "pipe",
+                encoding: "utf-8",
+            });
+            expect(output).toContain("CSS Variables Check skipped (missing src/styles/does-not-exist.css)");
         });
     });
 });

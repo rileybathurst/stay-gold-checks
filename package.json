@@ -16,16 +16,13 @@
     "stay-gold-css-vars": "dist/css-vars.js",
     "stay-gold-css-named-colors": "dist/css-named-colors.js",
     "stay-gold": "dist/index.js",
-    "stay-gold-graphql-query-names": "dist/graphql-query-names.js"
+    "stay-gold-graphql-query-names": "dist/graphql-query-names.js",
+    "stay-gold-package-framework-deps": "dist/package-json-framework-deps.js"
   },
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "find": "node dist/bang.js",
-    "todos": "node dist/todos.js",
-    "variables": "node dist/css-vars.js",
-    "named-colors": "node dist/css-named-colors.js",
     "gold": "npm run find && npm run todos && npm run variables && npm run named-colors && echo 'All checks passed!' || echo 'Some checks failed!'",
     "release": "npm run build && npm version patch && npm login && npm publish"
   },

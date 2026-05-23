@@ -7,7 +7,7 @@ import pc from "picocolors";
 import { spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const filePath = path.dirname(fileURLToPath(import.meta.url));
 
@@ -20,7 +20,25 @@ const log = {
 	muted: (message: string): void => console.log(pc.dim(message)),
 };
 
-const checks = [
+type CheckDefinition = {
+	name: string;
+	script: string;
+	failsBuild?: boolean;
+	requiresPath?: string;
+	skip?: boolean;
+};
+
+type CheckOverride = {
+	skip?: boolean;
+	failsBuild?: boolean;
+	requiresPath?: string | null;
+};
+
+type StayGoldConfig = {
+	checks?: Record<string, CheckOverride>;
+};
+
+const baseChecks: CheckDefinition[] = [
 	{
 		name: "Bang Check",
 		script: path.join(filePath, "/bang.js"),
@@ -52,7 +70,75 @@ const checks = [
 		script: path.join(filePath, "/graphql-query-names.js"),
 		failsBuild: true,
 	},
+	{
+		name: "Package Framework Dependencies Check",
+		script: path.join(filePath, "/package-json-framework-deps.js"),
+		requiresPath: "package.json",
+	},
 ];
+
+function loadUserConfig(): StayGoldConfig {
+	const configPath = path.join(process.cwd(), "stay-gold.json");
+
+	if (!existsSync(configPath)) {
+		return {};
+	}
+
+	try {
+		const parsed = JSON.parse(readFileSync(configPath, "utf-8")) as unknown;
+		if (
+			typeof parsed !== "object" ||
+			parsed === null ||
+			("checks" in parsed &&
+				(typeof (parsed as { checks?: unknown }).checks !== "object" ||
+					(parsed as { checks?: unknown }).checks === null))
+		) {
+			log.warn(
+				"stay-gold.json is invalid; expected an object with an optional checks map. Using defaults.",
+			);
+			return {};
+		}
+
+		log.muted("Using preferences from stay-gold.json");
+		return parsed as StayGoldConfig;
+	} catch (error) {
+		log.warn(
+			`Failed to parse stay-gold.json (${String(error)}). Using default checks.`,
+		);
+		return {};
+	}
+}
+
+function resolveChecks(): CheckDefinition[] {
+	const userConfig = loadUserConfig();
+
+	return baseChecks.map((check) => {
+		const override = userConfig.checks?.[check.name];
+		if (!override) {
+			return check;
+		}
+
+		const mergedCheck: CheckDefinition = { ...check };
+
+		if (typeof override.skip === "boolean") {
+			mergedCheck.skip = override.skip;
+		}
+
+		if (typeof override.failsBuild === "boolean") {
+			mergedCheck.failsBuild = override.failsBuild;
+		}
+
+		if (typeof override.requiresPath === "string") {
+			mergedCheck.requiresPath = override.requiresPath;
+		}
+
+		if (override.requiresPath === null) {
+			delete mergedCheck.requiresPath;
+		}
+
+		return mergedCheck;
+	});
+}
 
 async function runCheck(script: string, name: string): Promise<boolean> {
 	return new Promise((resolve) => {
@@ -73,10 +159,16 @@ async function runCheck(script: string, name: string): Promise<boolean> {
 
 async function runAllChecks(): Promise<void> {
 	log.headline("Running all Stay Gold checks...\n");
+	const checks = resolveChecks();
 
 	let blockingCheckFailed = false;
 
 	for (const check of checks) {
+		if (check.skip) {
+			log.muted(`⏭️ ${check.name} skipped (disabled in stay-gold.json)`);
+			continue;
+		}
+
 		if (
 			check.requiresPath &&
 			!existsSync(path.join(process.cwd(), check.requiresPath))
