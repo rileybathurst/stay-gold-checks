@@ -249,7 +249,7 @@ describe("stay-gold command", () => {
 			expect(output).toContain("No forbidden string found");
 		});
 
-		it("should detect blocked framework dependency prefixes in package.json", () => {
+		it("should fail Gatsby-specific checks when start script is missing tsc --noEmit", () => {
 			writeFileSync(
 				join(testDir, "package.json"),
 				JSON.stringify(
@@ -259,6 +259,9 @@ describe("stay-gold command", () => {
 						dependencies: {
 							gatsby: "^5.0.0",
 							react: "^18.0.0",
+						},
+						scripts: {
+							start: "gatsby develop",
 						},
 					},
 					null,
@@ -279,8 +282,58 @@ describe("stay-gold command", () => {
 			} catch (error: any) {
 				expect(error.status).toBe(1);
 				const stderr = error.stderr?.toString() || "";
-				expect(stderr).toContain("Found dependency matching blocked prefixes");
-				expect(stderr).toContain("gatsby");
+				expect(stderr).toContain("Gatsby check failed");
+				expect(stderr).toContain("scripts.start must include");
+			} finally {
+				writeFileSync(
+					join(testDir, "package.json"),
+					JSON.stringify(
+						{
+							name: "test-project",
+							version: "1.0.0",
+							dependencies: {
+								react: "^18.0.0",
+							},
+						},
+						null,
+						2,
+					),
+				);
+			}
+		});
+
+		it("should pass Gatsby-specific checks when start script includes tsc --noEmit", () => {
+			writeFileSync(
+				join(testDir, "package.json"),
+				JSON.stringify(
+					{
+						name: "test-project",
+						version: "1.0.0",
+						dependencies: {
+							gatsby: "^5.0.0",
+							react: "^18.0.0",
+						},
+						scripts: {
+							start: "gatsby develop && tsc --noEmit",
+						},
+					},
+					null,
+					2,
+				),
+			);
+
+			try {
+				const output = execSync(
+					`node ${join(process.cwd(), "dist/package-json-framework-deps.js")}`,
+					{
+						cwd: testDir,
+						stdio: "pipe",
+						encoding: "utf-8",
+					},
+				);
+
+				expect(output).toContain("Gatsby check passed");
+				expect(output).toContain("All Gatsby-specific package checks passed");
 			} finally {
 				writeFileSync(
 					join(testDir, "package.json"),
@@ -326,7 +379,7 @@ describe("stay-gold command", () => {
 			);
 
 			expect(output).toContain(
-				"No blocked framework dependency prefixes found in package.json",
+				"No targeted framework dependency prefixes found in package.json",
 			);
 		});
 	});
