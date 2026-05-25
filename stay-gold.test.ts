@@ -216,6 +216,68 @@ describe("stay-gold command", () => {
 			}
 		});
 
+		it("should detect hardcoded CSS values that should use variables", () => {
+			writeFileSync(
+				join(stylesDir, "hardcoded-values.css"),
+				"h1 { font-size: 1rem; }\n",
+			);
+			writeFileSync(
+				join(stylesDir, "variables.css"),
+				":root {\n  --primary: #000;\n  --secondary: #fff;\n  --vinson: 1rem;\n}\n",
+			);
+
+			try {
+				execSync(
+					`node ${join(process.cwd(), "dist/css-variable-usage.js")}`,
+					{
+						cwd: testDir,
+						stdio: "pipe",
+						encoding: "utf-8",
+					},
+				);
+				expect.fail("Should have exited with error code 1");
+			} catch (error: any) {
+				expect(error.status).toBe(1);
+				expect(error.stderr.toString()).toContain("Hardcoded value '1rem'");
+				expect(error.stderr.toString()).toContain("var(--vinson)");
+			} finally {
+				rmSync(join(stylesDir, "hardcoded-values.css"), { force: true });
+				writeFileSync(
+					join(stylesDir, "variables.css"),
+					":root {\n  --primary: #000;\n  --secondary: #fff;\n}\n",
+				);
+			}
+		});
+
+		it("should pass CSS variable usage check when var() is used correctly", () => {
+			writeFileSync(
+				join(stylesDir, "variables.css"),
+				":root {\n  --primary: #000;\n  --vinson: 1rem;\n}\n",
+			);
+			writeFileSync(
+				join(stylesDir, "correct-usage.css"),
+				"h1 { font-size: var(--vinson); }\n",
+			);
+
+			try {
+				const output = execSync(
+					`node ${join(process.cwd(), "dist/css-variable-usage.js")}`,
+					{
+						cwd: testDir,
+						stdio: "pipe",
+						encoding: "utf-8",
+					},
+				);
+				expect(output).toContain("All CSS values correctly use variables");
+			} finally {
+				rmSync(join(stylesDir, "correct-usage.css"), { force: true });
+				writeFileSync(
+					join(stylesDir, "variables.css"),
+					":root {\n  --primary: #000;\n  --secondary: #fff;\n}\n",
+				);
+			}
+		});
+
 		it("should detect named CSS colors", () => {
 			writeFileSync(
 				join(stylesDir, "named-colors.css"),

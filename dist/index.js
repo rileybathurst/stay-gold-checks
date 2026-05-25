@@ -38,6 +38,11 @@ const baseChecks = [
         requiresPath: "src/styles",
     },
     {
+        name: "CSS Variable Usage Check",
+        script: path.join(filePath, "/css-variable-usage.js"),
+        requiresPath: "src/styles/variables.css",
+    },
+    {
         name: "CSS Imports Check",
         script: path.join(filePath, "/css-imports.js"),
         requiresPath: "src/styles",
