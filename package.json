@@ -15,6 +15,7 @@
     "stay-gold-todos": "dist/todos.js",
     "stay-gold-css-vars": "dist/css-vars.js",
     "stay-gold-css-named-colors": "dist/css-named-colors.js",
+    "stay-gold-css-variable-usage": "dist/css-variable-usage.js",
     "stay-gold": "dist/index.js",
     "stay-gold-graphql-query-names": "dist/graphql-query-names.js",
     "stay-gold-package-framework-deps": "dist/package-json-framework-deps.js"
