@@ -1,6 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { execSync } from "node:child_process";
-import { mkdirSync, writeFileSync, rmSync, existsSync } from "node:fs";
+import {
+	mkdirSync,
+	writeFileSync,
+	rmSync,
+	existsSync,
+	readFileSync,
+} from "node:fs";
 import { join } from "node:path";
 
 describe("stay-gold command", () => {
@@ -105,6 +111,49 @@ describe("stay-gold command", () => {
 					encoding: "utf-8",
 				});
 			}).not.toThrow();
+		});
+
+		it("should add an index to css section comments", () => {
+			const sectionFile = join(stylesDir, "sections.css");
+			writeFileSync(
+				sectionFile,
+				`/*------------------------------------*/
+/* #LAYOUT */
+/*------------------------------------*/
+
+body {
+	min-height: 100vh;
+}
+
+/*------------------------------------*/
+/* #Singles */
+/*------------------------------------*/
+
+.vulture {
+	max-width: var(--vulture);
+}
+`,
+			);
+
+			try {
+				execSync(
+					`node ${join(process.cwd(), "dist/css-section-index.js")} ${sectionFile}`,
+					{
+						cwd: testDir,
+						stdio: "pipe",
+						encoding: "utf-8",
+					},
+				);
+
+				const updatedContent = readFileSync(sectionFile, "utf8");
+				expect(updatedContent.startsWith("/* Index")).toBe(true);
+				expect(updatedContent).toContain("- layout");
+				expect(updatedContent).toContain("- singles");
+				const indexCount = (updatedContent.match(/\/\* Index/g) ?? []).length;
+				expect(indexCount).toBe(1);
+			} finally {
+				rmSync(sectionFile, { force: true });
+			}
 		});
 
 		it("should run all checks via gold command on clean project", () => {
@@ -227,14 +276,11 @@ describe("stay-gold command", () => {
 			);
 
 			try {
-				execSync(
-					`node ${join(process.cwd(), "dist/css-variable-usage.js")}`,
-					{
-						cwd: testDir,
-						stdio: "pipe",
-						encoding: "utf-8",
-					},
-				);
+				execSync(`node ${join(process.cwd(), "dist/css-variable-usage.js")}`, {
+					cwd: testDir,
+					stdio: "pipe",
+					encoding: "utf-8",
+				});
 				expect.fail("Should have exited with error code 1");
 			} catch (error: any) {
 				expect(error.status).toBe(1);

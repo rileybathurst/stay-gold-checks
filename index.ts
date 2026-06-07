@@ -71,6 +71,11 @@ const baseChecks: CheckDefinition[] = [
 		requiresPath: "src/styles",
 	},
 	{
+		name: "CSS Section Index Check",
+		script: path.join(filePath, "/css-section-index.js"),
+		requiresPath: "src/styles",
+	},
+	{
 		name: "GraphQL Query Names Check",
 		script: path.join(filePath, "/graphql-query-names.js"),
 		failsBuild: true,

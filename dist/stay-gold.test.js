@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { execSync } from "node:child_process";
-import { mkdirSync, writeFileSync, rmSync, existsSync } from "node:fs";
+import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync, } from "node:fs";
 import { join } from "node:path";
 describe("stay-gold command", () => {
     const testDir = join(process.cwd(), "test-project");
@@ -80,6 +80,42 @@ describe("stay-gold command", () => {
                     encoding: "utf-8",
                 });
             }).not.toThrow();
+        });
+        it("should add an index to css section comments", () => {
+            var _a;
+            const sectionFile = join(stylesDir, "sections.css");
+            writeFileSync(sectionFile, `/*------------------------------------*/
+/* #LAYOUT */
+/*------------------------------------*/
+
+body {
+	min-height: 100vh;
+}
+
+/*------------------------------------*/
+/* #Singles */
+/*------------------------------------*/
+
+.vulture {
+	max-width: var(--vulture);
+}
+`);
+            try {
+                execSync(`node ${join(process.cwd(), "dist/css-section-index.js")} ${sectionFile}`, {
+                    cwd: testDir,
+                    stdio: "pipe",
+                    encoding: "utf-8",
+                });
+                const updatedContent = readFileSync(sectionFile, "utf8");
+                expect(updatedContent.startsWith("/* Index")).toBe(true);
+                expect(updatedContent).toContain("- layout");
+                expect(updatedContent).toContain("- singles");
+                const indexCount = ((_a = updatedContent.match(/\/\* Index/g)) !== null && _a !== void 0 ? _a : []).length;
+                expect(indexCount).toBe(1);
+            }
+            finally {
+                rmSync(sectionFile, { force: true });
+            }
         });
         it("should run all checks via gold command on clean project", () => {
             const result = execSync("npm run gold", {
