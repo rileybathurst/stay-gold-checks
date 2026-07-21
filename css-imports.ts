@@ -2,7 +2,14 @@
 import pc from "picocolors";
 
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { extname, join, normalize, relative, resolve } from "node:path";
+import {
+	dirname,
+	extname,
+	join,
+	normalize,
+	relative,
+	resolve,
+} from "node:path";
 
 function resolveStylesDir(): string | null {
 	const stylesDirCandidates = [
@@ -56,24 +63,40 @@ function walkCssFiles(dir: string): string[] {
 function getImportedCssFiles(appCssPath: string): Set<string> {
 	const content = readFileSync(appCssPath, "utf8");
 	const imported = new Set<string>();
+	const appCssDir = dirname(appCssPath);
 
 	const importRegex =
 		/@import\s+(?:url\(\s*(?:['"]([^'")]+)['"]|([^'"\s)]+))\s*\)|['"]([^'")]+)['"])[^;]*;/g;
 
 	let match = importRegex.exec(content);
 	while (match !== null) {
-		const importTarget = match[1] ?? match[2] ?? match[3];
+		const importTarget = (match[1] ?? match[2] ?? match[3]).trim();
 
 		if (
 			importTarget.startsWith("http://") ||
-			importTarget.startsWith("https://")
+			importTarget.startsWith("https://") ||
+			importTarget.startsWith("data:")
 		) {
 			match = importRegex.exec(content);
 			continue;
 		}
 
-		const resolvedPath = normalize(resolve(resolvedStylesDir, importTarget));
-		imported.add(resolvedPath);
+		const importWithoutQuery = importTarget.split(/[?#]/)[0];
+		const styleRelativeTarget = importWithoutQuery.startsWith("/")
+			? importWithoutQuery.slice(1)
+			: importWithoutQuery;
+
+		const baseResolvedPath = importWithoutQuery.startsWith("/")
+			? normalize(resolve(resolvedStylesDir, styleRelativeTarget))
+			: normalize(resolve(appCssDir, styleRelativeTarget));
+		imported.add(baseResolvedPath);
+
+		// Support extensionless imports such as @import "variables" or @import "pages/projects".
+		if (extname(styleRelativeTarget) === "") {
+			imported.add(`${baseResolvedPath}.css`);
+			imported.add(normalize(join(baseResolvedPath, "index.css")));
+		}
+
 		match = importRegex.exec(content);
 	}
 

@@ -15,6 +15,13 @@ describe("stay-gold command", () => {
 	const publicDir = join(testDir, "public");
 	const stylesDir = join(srcDir, "styles");
 	const preferencesPath = join(testDir, "stay-gold.json");
+	const fixtureScripts = {
+		find: "node ../dist/bang.js",
+		todos: "node ../dist/todos.js",
+		variables: "node ../dist/css-vars.js",
+		"named-colors": "node ../dist/css-named-colors.js",
+		gold: "npm run find && npm run todos && npm run variables && npm run named-colors",
+	};
 
 	beforeAll(() => {
 		// Create test project structure
@@ -47,6 +54,7 @@ describe("stay-gold command", () => {
 					dependencies: {
 						react: "^18.0.0",
 					},
+					scripts: fixtureScripts,
 				},
 				null,
 				2,
@@ -117,7 +125,7 @@ describe("stay-gold command", () => {
 			writeFileSync(join(stylesDir, "styles.css"), ".test { color: red; }\n");
 			writeFileSync(
 				join(stylesDir, "app.css"),
-				'@import url(./variables.css);\n@import url("./styles.css");\n',
+				'@import "variables";\n@import "styles";\n',
 			);
 
 			try {
@@ -135,6 +143,10 @@ describe("stay-gold command", () => {
 				);
 			} finally {
 				rmSync(join(stylesDir, "app.css"), { force: true });
+				writeFileSync(
+					join(stylesDir, "styles.css"),
+					".test { color: var(--primary); }\n",
+				);
 			}
 		});
 
@@ -475,6 +487,7 @@ body {
 							dependencies: {
 								react: "^18.0.0",
 							},
+							scripts: fixtureScripts,
 						},
 						null,
 						2,
@@ -525,6 +538,7 @@ body {
 							dependencies: {
 								react: "^18.0.0",
 							},
+							scripts: fixtureScripts,
 						},
 						null,
 						2,
