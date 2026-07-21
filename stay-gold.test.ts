@@ -324,14 +324,14 @@ body {
 			}
 		});
 
-		it("should allow specific hardcoded declarations", () => {
+		it("should ignore integer-only variable values and skipped properties", () => {
 			writeFileSync(
 				join(stylesDir, "variables.css"),
-				":root {\n  --zero: 0;\n  --one: 1;\n  --grid-span: 1 / 2;\n  --grid-columns: 1fr 1fr;\n}\n",
+				":root {\n  --floor: 0;\n  --understory: 1;\n  --canopy: 2;\n  --emergent: 3;\n  --grid-span: 1 / 2;\n  --grid-columns: 1fr 1fr;\n}\n",
 			);
 			writeFileSync(
 				join(stylesDir, "allowed-hardcoded-values.css"),
-				".test { width: 0; margin: 0; line-height: 0; grid-row: 1; grid-row: 1 / 2; grid-template-columns: 1fr 1fr; }\n",
+				".test { width: 0; z-index: 1; order: 2; line-height: 3; grid-row: 1; grid-row: 1 / 2; grid-template-columns: 1fr 1fr; }\n",
 			);
 
 			try {

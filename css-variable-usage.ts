@@ -9,25 +9,20 @@ import { resolve, join, basename } from "node:path";
 const stylesDir = resolve(process.cwd(), "src/styles");
 const variablesFile = join(stylesDir, "variables.css");
 
-const allowedHardcodedDeclarations = ["0"];
-
 const allowedHardcodedProperties = [
 	"grid-row",
 	"grid-column",
 	"grid-template-rows",
 	"grid-template-columns",
+	"flex",
 ];
 
-function excemptRules(propertyName: string, declaration: string): boolean {
-	if (allowedHardcodedProperties.includes(propertyName)) {
-		return true;
-	}
+function isIntegerOnlyValue(value: string): boolean {
+	return /^\d+$/.test(value);
+}
 
-	if (allowedHardcodedDeclarations.includes(declaration)) {
-		return true;
-	}
-
-	return false;
+function isExemptProperty(propertyName: string): boolean {
+	return allowedHardcodedProperties.includes(propertyName);
 }
 
 function getDefinedVarValues(file: string): Map<string, string> {
@@ -36,7 +31,10 @@ function getDefinedVarValues(file: string): Map<string, string> {
 	const vars = new Map<string, string>();
 	let match: RegExpExecArray | null = varRegex.exec(content);
 	while (match !== null) {
-		vars.set(match[1], match[2].trim());
+		const varValue = match[2].trim();
+		if (!isIntegerOnlyValue(varValue)) {
+			vars.set(match[1], varValue);
+		}
 		match = varRegex.exec(content);
 	}
 	return vars;
@@ -56,12 +54,8 @@ function checkHardcodedValues(
 	while (match !== null) {
 		const propertyName = match[1];
 		const propValue = match[2].trim();
-		const declaration = propValue;
 
-		if (
-			!propValue.includes("var(") &&
-			!excemptRules(propertyName, declaration)
-		) {
+		if (!propValue.includes("var(") && !isExemptProperty(propertyName)) {
 			for (const [varName, varValue] of varValues) {
 				if (propValue === varValue) {
 					console.error(
