@@ -83,7 +83,7 @@ describe("stay-gold command", () => {
         });
         it("should execute css-imports checker with src/styles", () => {
             writeFileSync(join(stylesDir, "styles.css"), ".test { color: red; }\n");
-            writeFileSync(join(stylesDir, "app.css"), '@import "./variables.css";\n@import "./styles.css";\n');
+            writeFileSync(join(stylesDir, "app.css"), '@import url(./variables.css);\n@import url("./styles.css");\n');
             try {
                 const output = execSync(`node ${join(process.cwd(), "dist/css-imports.js")}`, {
                     cwd: testDir,

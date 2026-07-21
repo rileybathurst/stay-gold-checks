@@ -57,11 +57,12 @@ function getImportedCssFiles(appCssPath: string): Set<string> {
 	const content = readFileSync(appCssPath, "utf8");
 	const imported = new Set<string>();
 
-	const importRegex = /@import\s+(?:url\()?\s*['"]([^'")]+)['"]\s*\)?[^;]*;/g;
+	const importRegex =
+		/@import\s+(?:url\(\s*(?:['"]([^'")]+)['"]|([^'"\s)]+))\s*\)|['"]([^'")]+)['"])[^;]*;/g;
 
 	let match = importRegex.exec(content);
 	while (match !== null) {
-		const importTarget = match[1];
+		const importTarget = match[1] ?? match[2] ?? match[3];
 
 		if (
 			importTarget.startsWith("http://") ||

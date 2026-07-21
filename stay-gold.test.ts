@@ -117,7 +117,7 @@ describe("stay-gold command", () => {
 			writeFileSync(join(stylesDir, "styles.css"), ".test { color: red; }\n");
 			writeFileSync(
 				join(stylesDir, "app.css"),
-				'@import "./variables.css";\n@import "./styles.css";\n',
+				'@import url(./variables.css);\n@import url("./styles.css");\n',
 			);
 
 			try {
