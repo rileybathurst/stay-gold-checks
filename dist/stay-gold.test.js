@@ -245,6 +245,24 @@ body {
                 writeFileSync(join(stylesDir, "variables.css"), ":root {\n  --primary: #000;\n  --secondary: #fff;\n}\n");
             }
         });
+        it("should allow specific hardcoded declarations", () => {
+            writeFileSync(join(stylesDir, "variables.css"), ":root {\n  --zero: 0;\n  --one: 1;\n  --grid-span: 1 / 2;\n  --grid-columns: 1fr 1fr;\n}\n");
+            writeFileSync(join(stylesDir, "allowed-hardcoded-values.css"), ".test { width: 0; margin: 0; line-height: 0; grid-row: 1; grid-row: 1 / 2; grid-template-columns: 1fr 1fr; }\n");
+            try {
+                const output = execSync(`node ${join(process.cwd(), "dist/css-variable-usage.js")}`, {
+                    cwd: testDir,
+                    stdio: "pipe",
+                    encoding: "utf-8",
+                });
+                expect(output).toContain("All CSS values correctly use variables");
+            }
+            finally {
+                rmSync(join(stylesDir, "allowed-hardcoded-values.css"), {
+                    force: true,
+                });
+                writeFileSync(join(stylesDir, "variables.css"), ":root {\n  --primary: #000;\n  --secondary: #fff;\n}\n");
+            }
+        });
         it("should detect named CSS colors", () => {
             writeFileSync(join(stylesDir, "named-colors.css"), ".test { color: red; background: blue; white-space: nowrap; }\n");
             try {

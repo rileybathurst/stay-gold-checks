@@ -9,6 +9,27 @@ import { resolve, join, basename } from "node:path";
 const stylesDir = resolve(process.cwd(), "src/styles");
 const variablesFile = join(stylesDir, "variables.css");
 
+const allowedHardcodedDeclarations = ["0"];
+
+const allowedHardcodedProperties = [
+	"grid-row",
+	"grid-column",
+	"grid-template-rows",
+	"grid-template-columns",
+];
+
+function excemptRules(propertyName: string, declaration: string): boolean {
+	if (allowedHardcodedProperties.includes(propertyName)) {
+		return true;
+	}
+
+	if (allowedHardcodedDeclarations.includes(declaration)) {
+		return true;
+	}
+
+	return false;
+}
+
 function getDefinedVarValues(file: string): Map<string, string> {
 	const content = readFileSync(file, "utf8");
 	const varRegex = /--([\w-]+):\s*([^;]+);/g;
@@ -33,9 +54,14 @@ function checkHardcodedValues(
 
 	let match: RegExpExecArray | null = propRegex.exec(content);
 	while (match !== null) {
+		const propertyName = match[1];
 		const propValue = match[2].trim();
+		const declaration = propValue;
 
-		if (!propValue.includes("var(")) {
+		if (
+			!propValue.includes("var(") &&
+			!excemptRules(propertyName, declaration)
+		) {
 			for (const [varName, varValue] of varValues) {
 				if (propValue === varValue) {
 					console.error(
