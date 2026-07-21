@@ -4,8 +4,33 @@ import pc from "picocolors";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join, normalize, relative, resolve } from "node:path";
 
-const stylesDir = resolve(process.cwd(), "styles");
-const appCssFile = join(stylesDir, "app.css");
+function resolveStylesDir(): string | null {
+	const stylesDirCandidates = [
+		resolve(process.cwd(), "styles"),
+		resolve(process.cwd(), "src/styles"),
+	];
+
+	for (const candidate of stylesDirCandidates) {
+		if (existsSync(candidate)) {
+			return candidate;
+		}
+	}
+
+	return null;
+}
+
+const stylesDir = resolveStylesDir();
+
+if (stylesDir === null) {
+	console.error(
+		pc.yellow("Missing styles directory at styles/ or src/styles/"),
+	);
+	process.exit(1);
+}
+
+const resolvedStylesDir = stylesDir;
+
+const appCssFile = join(resolvedStylesDir, "app.css");
 
 function walkCssFiles(dir: string): string[] {
 	let results: string[] = [];
@@ -46,7 +71,7 @@ function getImportedCssFiles(appCssPath: string): Set<string> {
 			continue;
 		}
 
-		const resolvedPath = normalize(resolve(stylesDir, importTarget));
+		const resolvedPath = normalize(resolve(resolvedStylesDir, importTarget));
 		imported.add(resolvedPath);
 		match = importRegex.exec(content);
 	}
@@ -54,17 +79,14 @@ function getImportedCssFiles(appCssPath: string): Set<string> {
 	return imported;
 }
 
-if (!existsSync(stylesDir)) {
-	console.error(pc.yellow("Missing styles directory at styles/"));
-	process.exit(1);
-}
-
 if (!existsSync(appCssFile)) {
-	console.error(pc.yellow("Missing app.css at styles/app.css"));
+	console.error(
+		pc.yellow("Missing app.css at styles/app.css or src/styles/app.css"),
+	);
 	process.exit(1);
 }
 
-const allCssFiles = walkCssFiles(stylesDir);
+const allCssFiles = walkCssFiles(resolvedStylesDir);
 const importedFiles = getImportedCssFiles(appCssFile);
 
 const missingImports = allCssFiles
@@ -73,12 +95,16 @@ const missingImports = allCssFiles
 
 if (missingImports.length > 0) {
 	console.error(
-		pc.red("The following CSS file(s) are not imported by styles/app.css:"),
+		pc.red(
+			"The following CSS file(s) are not imported by app.css in styles/ or src/styles/:",
+		),
 	);
 	for (const filePath of missingImports) {
-		console.error(pc.red(`- ${relative(stylesDir, filePath)}`));
+		console.error(pc.red(`- ${relative(resolvedStylesDir, filePath)}`));
 	}
 	process.exit(1);
 }
 
-console.log(pc.green("styles/app.css imports every other CSS file in styles/"));
+console.log(
+	pc.green("app.css imports every other CSS file in styles/ or src/styles/"),
+);

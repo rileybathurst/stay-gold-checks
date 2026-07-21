@@ -113,6 +113,31 @@ describe("stay-gold command", () => {
 			}).not.toThrow();
 		});
 
+		it("should execute css-imports checker with src/styles", () => {
+			writeFileSync(join(stylesDir, "styles.css"), ".test { color: red; }\n");
+			writeFileSync(
+				join(stylesDir, "app.css"),
+				'@import "./variables.css";\n@import "./styles.css";\n',
+			);
+
+			try {
+				const output = execSync(
+					`node ${join(process.cwd(), "dist/css-imports.js")}`,
+					{
+						cwd: testDir,
+						stdio: "pipe",
+						encoding: "utf-8",
+					},
+				);
+
+				expect(output).toContain(
+					"app.css imports every other CSS file in styles/ or src/styles/",
+				);
+			} finally {
+				rmSync(join(stylesDir, "app.css"), { force: true });
+			}
+		});
+
 		it("should add an index to css section comments", () => {
 			const sectionFile = join(stylesDir, "sections.css");
 			writeFileSync(
