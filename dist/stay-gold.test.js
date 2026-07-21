@@ -246,7 +246,7 @@ body {
             }
         });
         it("should detect named CSS colors", () => {
-            writeFileSync(join(stylesDir, "named-colors.css"), ".test { color: red; background: blue; }\n");
+            writeFileSync(join(stylesDir, "named-colors.css"), ".test { color: red; background: blue; white-space: nowrap; }\n");
             try {
                 execSync(`node ${join(process.cwd(), "dist/css-named-colors.js")}`, {
                     cwd: testDir,
@@ -264,6 +264,17 @@ body {
                 // Cleanup
                 rmSync(join(stylesDir, "named-colors.css"), { force: true });
             }
+        });
+        it("should not match white-space as a named CSS color", () => {
+            writeFileSync(join(stylesDir, "named-colors.css"), ".test { white-space: nowrap; }\n");
+            expect(() => {
+                execSync(`node ${join(process.cwd(), "dist/css-named-colors.js")}`, {
+                    cwd: testDir,
+                    stdio: "pipe",
+                    encoding: "utf-8",
+                });
+            }).not.toThrow();
+            rmSync(join(stylesDir, "named-colors.css"), { force: true });
         });
         it("should pass all checks when project is clean", () => {
             const output = execSync(`node ${join(process.cwd(), "dist/bang.js")}`, {

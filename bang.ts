@@ -12,19 +12,20 @@ const rootDir = resolve(process.cwd(), "src");
 // const publicDir = resolve(process.cwd(), "public");
 
 function checkFiles(files: string[]): boolean {
-  let found: boolean = false;
-  files.forEach((file: string) => {
-    const content: string = readFileSync(file, "utf8");
-    if (
-      content.includes("// !") ||
-      content.includes("<!-- !") ||
-      content.includes("/* !")
-    ) {
-      console.error(`Forbidden string found in: ${file}`);
-      found = true;
-    }
-  });
-  return found;
+	let found: boolean = false;
+	files.forEach((file: string) => {
+		const content: string = readFileSync(file, "utf8");
+		if (
+			content.includes("// !") ||
+			content.includes("<!-- !") ||
+			content.includes("/* !")
+		) {
+			// TODO: remove everything before the project folder
+			console.error(`Forbidden string found in: ${file}`);
+			found = true;
+		}
+	});
+	return found;
 }
 
 const srcFiles = walk(rootDir, exts);
@@ -32,8 +33,8 @@ const srcFiles = walk(rootDir, exts);
 // const allFiles = srcFiles.concat(publicFiles);
 
 if (checkFiles(srcFiles)) {
-  // console.error(`Total ! found: ${namedStringCount}`);
-  process.exit(1);
+	// console.error(`Total ! found: ${namedStringCount}`);
+	process.exit(1);
 } else {
-  console.log("No forbidden string found.");
+	console.log("No forbidden string found.");
 }

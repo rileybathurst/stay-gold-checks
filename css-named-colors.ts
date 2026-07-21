@@ -21,7 +21,7 @@ function checkNamedColors(files: string[]): number {
 	files.forEach((file: string) => {
 		const content: string = readFileSync(file, "utf8");
 		namedColors.forEach((color: string) => {
-			const regex = new RegExp(`\\b${color}\\b`, "gi");
+			const regex = new RegExp(`(?<![\\w-])${color}(?![\\w-])`, "gi");
 			const matches = content.match(regex);
 			if (matches && matches.length > 0) {
 				console.log(

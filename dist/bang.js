@@ -14,6 +14,7 @@ function checkFiles(files) {
         if (content.includes("// !") ||
             content.includes("<!-- !") ||
             content.includes("/* !")) {
+            // TODO: remove everything before the project folder
             console.error(`Forbidden string found in: ${file}`);
             found = true;
         }
